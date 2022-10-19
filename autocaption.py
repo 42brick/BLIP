@@ -96,7 +96,7 @@ if __name__ == '__main__' :
             'text' : caption_list
         })
     
-    if len(add_tag) != 0 :
+    if len(tag) != 0 :
         caption_df['text'] = caption_dfp['text']+','+tag
     
     # outdir가 default 일때
