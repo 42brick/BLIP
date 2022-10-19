@@ -1,6 +1,5 @@
 logs/
 image/
-*.json
 *.csv
 *.parquet
 *.egg-info
