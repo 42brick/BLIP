@@ -72,11 +72,13 @@ if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
     # parser.add_argument("-i", "--image", default = './image/test.jpg') #test용
     parser.add_argument('-p',"--path",type=str, default='./image')
+    parser.add_argument('-t',"--tag",type=str, default='')
     parser.add_argument('-o',"--outdir",type=str,default='')
 
     args = parser.parse_args()
     path = args.path
     outdir = args.outdir
+    tag = args.tag
 
 
     # 모델 Load
@@ -93,6 +95,9 @@ if __name__ == '__main__' :
             'image' : image_list,
             'text' : caption_list
         })
+    
+    if len(add_tag) != 0 :
+        caption_df['text'] = caption_dfp['text']+','+tag
     
     # outdir가 default 일때
     if outdir=='' :
