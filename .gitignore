@@ -1,0 +1,16 @@
+logs/
+image/
+*.json
+*.csv
+*.parquet
+*.egg-info
+__pycache__
+*.zip
+*.ckpt
+*.mp4
+*.pth
+.ipynb_checkpoints/
+src/
+logs
+.vscode/
+im-examples/
