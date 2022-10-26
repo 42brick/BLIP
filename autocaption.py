@@ -19,7 +19,7 @@ import os
 class Predictor :
     def __init__(self):
         self.device = "cuda:0"
-        self.models = blip_decoder(pretrained='checkpoints/model_base_caption.pth', image_size=384, vit='base')
+        self.models = blip_decoder(pretrained='checkpoints/model_blip.pth', image_size=384, vit='base')
 
     def predict(self, path):
         model = self.models
@@ -44,7 +44,17 @@ class Predictor :
             
         return image_list, caption_list
 
+    def predict_one(self, img_path):
+        model = self.models
+        model.eval()
+        model = model.to(self.device)
 
+        im, _ = load_image(img_path, image_size=384, device=self.device)
+
+        with torch.no_grad():
+            caption = model.generate(im, sample=True,num_beams=3, max_length=30, min_length=20)
+        caption = caption[0] + ' ,with lego face, lego figure,4k,8k'
+        return caption
 
 def load_image(image, image_size, device):
     with open(image,'rb') as f:
@@ -70,15 +80,13 @@ def load_image(image, image_size, device):
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
-    # parser.add_argument("-i", "--image", default = './image/test.jpg') #test용
-    parser.add_argument('-p',"--path",type=str, default='./image')
-    parser.add_argument('-t',"--tag",type=str, default='')
+    parser.add_argument("-i", "--image", default = './image/test.jpg') #test용
+    #parser.add_argument('-p',"--path",type=str, default='./image')
     parser.add_argument('-o',"--outdir",type=str,default='')
 
     args = parser.parse_args()
-    path = args.path
+    image_path = args.image
     outdir = args.outdir
-    tag = args.tag
 
 
     # 모델 Load
@@ -88,23 +96,10 @@ if __name__ == '__main__' :
 
     # 모델 Inference 및 caption, image_bytes 생성
     print('캡션을 생성합니다...')
-    image_list, caption_list = model.predict(path)
+    caption = model.predict_one(image_path)
 
-    # DataFrame 생성
-    caption_df = pd.DataFrame({
-            'image' : image_list,
-            'text' : caption_list
-        })
     
-    if len(tag) != 0 :
-        caption_df['text'] = caption_dfp['text']+','+tag
-    
-    # outdir가 default 일때
-    if outdir=='' :
-        outdir = path.split('/')[-1]
-
-    # save
-    print('캡션을 저장합니다...')
-    # caption_df.to_csv(f'./output/{outdir}.csv') #csv
-    caption_df.to_parquet(f'./output/{outdir}.parquet', engine='pyarrow', index=False) #parquet
-    print("완료")
+    with open(f'{outdir}.txt', 'w') as f :
+        f.write(caption)
+        f.close()
+            
